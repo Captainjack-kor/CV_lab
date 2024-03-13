@@ -28,37 +28,20 @@
 
             var content = CKEDITOR.instances.editor.getData(); // CKEditor에서 작성된 내용 가져오기
 
-            // XSS 방지 필터링 함수
-            function sanitizeHTML(str) {
-                return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            }
-
-            // 작성된 내용을 안전하게 저장
-            saveContent(sanitizeHTML(content));
+            // 게시글 저장 및 불러오기
+            saveContent(content);
         });
 
-        // 데이터를 안전하게 저장하는 함수
+        // 데이터를 저장하고 불러오는 함수
         function saveContent(content) {
-            // 게시글 번호를 지정
-            var postNumber = document.querySelectorAll('#contentDisplay .post').length + 1;
-
-            // 게시글 제목과 내용을 저장
-            var postTitle = "게시글 번호 " + postNumber;
-            var postData = '<div class="post"><h2>' + postTitle + '</h2>' + content + '</div>';
-
-            // 저장된 게시글 표시
-            document.getElementById('contentDisplay').innerHTML += postData;
+            // 게시글 저장
+            localStorage.setItem('savedContent', content);
+            
+            // 게시글 불러오기
+            var savedContent = localStorage.getItem('savedContent');
+            var displayDiv = document.getElementById('contentDisplay');
+            displayDiv.innerHTML = savedContent;
         }
-
-        // 게시글 조회 시 CKEditor에 표시
-        var posts = document.querySelectorAll('.post');
-        posts.forEach(function(post) {
-            var postContent = post.innerHTML;
-            var editor = CKEDITOR.appendTo(post, {}, postContent);
-            editor.then(function() {
-                editor.editable().setReadOnly(true);
-            });
-        });
     </script>
 </body>
 </html>
