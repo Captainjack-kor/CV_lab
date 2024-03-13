@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKEditor 4 게시글 저장 입력 조회 폼</title>
+    <script src="/static/ckeditor/ckeditor.js"></script>
+</head>
+<body>
+    <h1>게시글 작성</h1>
+    <form id="postForm">
+        <textarea name="editor" id="editor"></textarea>
+        <button type="submit">게시글 저장</button>
+    </form>
+
+    <hr>
+
+    <h1>게시글 조회</h1>
+    <div id="contentDisplay"></div>
+
+    <script>
+        // CKEditor를 textarea에 로드
+        CKEDITOR.replace('editor');
+
+        // 폼 제출 시 이벤트 처리
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 기본 제출 동작 방지
+
+            var content = CKEDITOR.instances.editor.getData(); // CKEditor에서 작성된 내용 가져오기
+
+            // XSS 방지 필터링 함수
+            function sanitizeHTML(str) {
+                return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            // 작성된 내용을 안전하게 저장
+            saveContent(sanitizeHTML(content));
+        });
+
+        // 데이터를 안전하게 저장하는 함수
+        function saveContent(content) {
+            // 게시글 번호를 지정
+            var postNumber = document.querySelectorAll('#contentDisplay .post').length + 1;
+
+            // 게시글 제목과 내용을 저장
+            var postTitle = "게시글 번호 " + postNumber;
+            var postData = '<div class="post"><h2>' + postTitle + '</h2>' + content + '</div>';
+
+            // 저장된 게시글 표시
+            document.getElementById('contentDisplay').innerHTML += postData;
+        }
+
+        // 게시글 조회 시 CKEditor에 표시
+        var posts = document.querySelectorAll('.post');
+        posts.forEach(function(post) {
+            var postContent = post.innerHTML;
+            var editor = CKEDITOR.appendTo(post, {}, postContent);
+            editor.then(function() {
+                editor.editable().setReadOnly(true);
+            });
+        });
+    </script>
+</body>
+</html>
