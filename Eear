@@ -1,0 +1,71 @@
+import React, { useState } from 'react';
+import { Tabs, Tab, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+
+function VerticalTabsAccordion() {
+  const [openTabIndex, setOpenTabIndex] = useState(null); // 초기에는 아무 탭도 열려있지 않음
+
+  const handleTabClick = (index) => {
+    // 이미 열려있는 탭을 다시 클릭하면 닫고, 다른 탭을 클릭하면 그 탭을 엶
+    setOpenTabIndex(openTabIndex === index ? null : index);
+  };
+
+  return (
+    <Box sx={{ flexGrow: 1, display: 'flex', height: 224 }}>
+      {/* 탭 */}
+      <Tabs
+        orientation="vertical"
+        variant="scrollable"
+        value={false} // Tabs 컴포넌트의 value를 사용하지 않고, 수동으로 상태 관리
+        sx={{ borderRight: 1, borderColor: 'divider' }}
+      >
+        {/* Tab 1 */}
+        <Tab
+          label="Menu 1"
+          onClick={() => handleTabClick(0)}
+          sx={{
+            justifyContent: 'flex-start',
+            minHeight: '48px',
+            '&.Mui-selected': {
+              backgroundColor: '#e0e0e0', // 선택된 탭 스타일
+            }
+          }}
+        />
+
+        {/* 조건부 렌더링으로 서브메뉴 표시 */}
+        {openTabIndex === 0 && (
+          <Box sx={{ pl: 2 }}>
+            <List component="div" disablePadding>
+              <ListItem button>
+                <ListItemText primary="Submenu 1-1" />
+              </ListItem>
+              <ListItem button>
+                <ListItemText primary="Submenu 1-2" />
+              </ListItem>
+            </List>
+          </Box>
+        )}
+        
+        {/* Tab 2 */}
+        <Tab
+          label="Menu 2"
+          onClick={() => handleTabClick(1)}
+          sx={{ justifyContent: 'flex-start' }}
+        />
+        
+        {/* 조건부 렌더링으로 서브메뉴 표시 */}
+        {openTabIndex === 1 && (
+          <Box sx={{ pl: 2 }}>
+            <List component="div" disablePadding>
+              <ListItem button>
+                <ListItemText primary="Submenu 2-1" />
+              </ListItem>
+              <ListItem button>
+                <ListItemText primary="Submenu 2-2" />
+              </ListItem>
+            </List>
+          </Box>
+        )}
+      </Tabs>
+    </Box>
+  );
+}
