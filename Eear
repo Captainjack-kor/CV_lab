@@ -1,71 +1,73 @@
-import React, { useState } from 'react';
-import { Tabs, Tab, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+'use client';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import NumberFlow, { useCanAnimate } from '@number-flow/react';
+import { ArrowUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+const MotionNumberFlow = motion.create(NumberFlow);
+const MotionArrowUp = motion.create(ArrowUp);
+export function PriceWithDiff({ value, diff }) {
+  const canAnimate = useCanAnimate();
+  return (
+    <>
+      <span className="flex items-center justify-center gap-2">
+        <NumberFlow
+          value={value}
+          className="text-5xl font-semibold"
+          format={{ style: 'currency', currency: 'USD' }}
+        />
+        <motion.span
+          className={cn(
+            diff > 0 ? 'bg-emerald-400' : 'bg-red-500',
+            'inline-flex items-center px-[0.3em] text-white transition-colors duration-300'
+          )}
+          style={{ borderRadius: 999 }}
+          layout={canAnimate}
+          transition={{ layout: { duration: 0.9, bounce: 0, type: 'spring' } }}>
+          {' '}
+          <MotionArrowUp
+            className="mr-0.5 size-[0.75em]"
+            absoluteStrokeWidth
+            strokeWidth={3}
+            transition={{
+              rotate: { type: 'spring', duration: 0.5, bounce: 0 },
+            }}
+            animate={{ rotate: diff > 0 ? 0 : -180 }}
+            initial={false}
+          />{' '}
+          <MotionNumberFlow
+            value={diff}
+            className="font-semibold"
+            format={{ style: 'percent', maximumFractionDigits: 2 }}
+            layout={canAnimate}
+            layoutRoot={canAnimate}
+          />{' '}
+        </motion.span>
+      </span>
+    </>
+  );
+}
+export default function Index() {
+  // 배열의 값이 하나만 있다고 가정
+  const numbers = [124.23];
+  const diffs = [0.0564];
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-function VerticalTabsAccordion() {
-  const [openTabIndex, setOpenTabIndex] = useState(null); // 초기에는 아무 탭도 열려있지 않음
+  // 5초마다 상태를 업데이트하여 애니메이션 효과를 재실행
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // numbers 배열의 길이가 1일 경우, currentIndex는 항상 0이다.
+      // 하지만 상태를 다시 설정하면 React가 리렌더링을 트리거하여 애니메이션을 재실행한다.
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % numbers.length);
+    }, 5000); // 5000ms = 5초
 
-  const handleTabClick = (index) => {
-    // 이미 열려있는 탭을 다시 클릭하면 닫고, 다른 탭을 클릭하면 그 탭을 엶
-    setOpenTabIndex(openTabIndex === index ? null : index);
-  };
+    // 컴포넌트가 언마운트될 때 인터벌을 정리(cleanup)한다.
+    return () => clearInterval(interval);
+  }, [numbers.length]); // numbers.length가 변경될 때마다 useEffect를 다시 실행
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', height: 224 }}>
-      {/* 탭 */}
-      <Tabs
-        orientation="vertical"
-        variant="scrollable"
-        value={false} // Tabs 컴포넌트의 value를 사용하지 않고, 수동으로 상태 관리
-        sx={{ borderRight: 1, borderColor: 'divider' }}
-      >
-        {/* Tab 1 */}
-        <Tab
-          label="Menu 1"
-          onClick={() => handleTabClick(0)}
-          sx={{
-            justifyContent: 'flex-start',
-            minHeight: '48px',
-            '&.Mui-selected': {
-              backgroundColor: '#e0e0e0', // 선택된 탭 스타일
-            }
-          }}
-        />
-
-        {/* 조건부 렌더링으로 서브메뉴 표시 */}
-        {openTabIndex === 0 && (
-          <Box sx={{ pl: 2 }}>
-            <List component="div" disablePadding>
-              <ListItem button>
-                <ListItemText primary="Submenu 1-1" />
-              </ListItem>
-              <ListItem button>
-                <ListItemText primary="Submenu 1-2" />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-        
-        {/* Tab 2 */}
-        <Tab
-          label="Menu 2"
-          onClick={() => handleTabClick(1)}
-          sx={{ justifyContent: 'flex-start' }}
-        />
-        
-        {/* 조건부 렌더링으로 서브메뉴 표시 */}
-        {openTabIndex === 1 && (
-          <Box sx={{ pl: 2 }}>
-            <List component="div" disablePadding>
-              <ListItem button>
-                <ListItemText primary="Submenu 2-1" />
-              </ListItem>
-              <ListItem button>
-                <ListItemText primary="Submenu 2-2" />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-      </Tabs>
-    </Box>
+    <>
+      <PriceWithDiff value={numbers[currentIndex]} diff={diffs[currentIndex]} />
+    </>
   );
 }
